@@ -13,18 +13,6 @@ class User {
     }
   }
 
-  static async changeBio(userId, bio) {
-    try {
-      await db.user.update({
-        where: { id: userId },
-        data: { bio },
-      });
-    } catch (error) {
-      console.error("Error updating bio:  ", error.stack);
-      throw new Error("Failed to update user bio.");
-    }
-  }
-
   static async changeEmail(userId, email) {
     try {
       await db.user.update({
@@ -61,18 +49,25 @@ class User {
     }
   }
 
+  static async get(data) {
+    try {
+      const user = await db.user.findFirst({
+        where: {
+          OR: [{ username: data }, { email: data }],
+        },
+      });
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by email/username:  ", error.stack);
+      throw new Error("Failed to fetch user by email/username");
+    }
+  }
+
   static async getById(id) {
     try {
       const user = await db.user.findUnique({
         where: { id },
-        omit: { email: true, password: true },
-        include: {
-          posts: true,
-          comments: true,
-          followers: true,
-          following: true,
-          _count: { select: { posts: true, followers: true, following: true } },
-        },
+        omit: { password: true },
       });
       return user;
     } catch (error) {
@@ -81,23 +76,17 @@ class User {
     }
   }
 
-  static async getByEmail(email) {
-    try {
-      const user = await db.user.findUnique({
-        where: { email },
-        include: {
-          posts: true,
-          comments: true,
-          followers: true,
-          following: true,
-        },
-      });
-      return user;
-    } catch (error) {
-      console.error("Error fetching user by email:  ", error.stack);
-      throw new Error("Failed to fetch user by email.");
-    }
-  }
+  // static async getByEmail(email) {
+  //   try {
+  //     const user = await db.user.findUnique({
+  //       where: { email },
+  //     });
+  //     return user;
+  //   } catch (error) {
+  //     console.error("Error fetching user by email:  ", error.stack);
+  //     throw new Error("Failed to fetch user by email.");
+  //   }
+  // }
 
   static async delete(userId) {
     try {

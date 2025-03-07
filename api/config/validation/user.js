@@ -32,10 +32,7 @@ exports.validateSignup = [
 ];
 
 exports.validateLogin = [
-  body("email")
-    .trim()
-    .isEmail()
-    .withMessage("Please provide a valid email address!"),
+  body("data").trim(),
 
   body("password")
     .trim()

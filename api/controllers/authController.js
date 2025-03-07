@@ -2,20 +2,20 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../prisma/queries/User");
-const { SECRET } = process.env;
+const { JWT_SECRET } = process.env;
 
 exports.postSignup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, username, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await User.create(name, email, hashedPassword);
+  const user = await User.create(name, username, email, hashedPassword);
 
-  res.status(201).send("User created successfully!");
+  res.status(200).json({ user });
 };
 
 exports.postLogin = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.getByEmail(email);
+  const { data, password } = req.body;
+  const user = await User.get(data);
 
   if (!user) return res.status(404).send("User not found!");
 
@@ -23,7 +23,8 @@ exports.postLogin = async (req, res) => {
   if (!matched) return res.status(400).send("Invalid password!");
 
   // sign token
-  jwt.sign({ user }, SECRET, (err, token) => res.status(200).send(token));
+  const token = jwt.sign({ user }, JWT_SECRET);
+  res.json({ msg: "User logged in!", token });
 };
 
 // verify middleware
@@ -35,7 +36,7 @@ exports.verifyToken = (req, res, next) => {
   req.token = authToken;
 
   // verify the token and add user to the request obj
-  jwt.verify(req.token, SECRET, (err, data) => {
+  jwt.verify(req.token, JWT_SECRET, (err, data) => {
     if (err) return res.sendStatus(403);
     req.user = data.user;
   });
