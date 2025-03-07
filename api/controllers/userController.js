@@ -1,6 +1,28 @@
 const bcrypt = require("bcryptjs");
 const User = require("../prisma/queries/User");
 
+exports.test = async (req, res) => {
+  const { data } = req.body;
+  try {
+    const user = await User.get(data);
+    if (!user) return res.status(404).json({ msg: "No user found" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.testProtected = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.getById(Number(userId));
+    if (!user) return res.status(404).json({ msg: "No user found" });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getUser = async (req, res) => {
   const { userId } = req.params;
   try {

@@ -9,6 +9,7 @@ const {
   putUserEmail,
   putUserPass,
   delUser,
+  testProtected,
 } = require("../controllers/userController");
 const { validateReq } = require("../config/validation/req");
 const {
@@ -22,6 +23,8 @@ userRouter.get("/:userId", getUser);
 
 // protect the routes
 userRouter.use("/:userId/*", [verifyToken, verifyOwnership]);
+
+userRouter.post("/:userId/protected", testProtected);
 
 userRouter.put("/:userId/name", [validateName, validateReq, putUserName]);
 userRouter.put("/:userId/email", [validateEmail, validateReq, putUserEmail]);

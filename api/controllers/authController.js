@@ -24,24 +24,49 @@ exports.postLogin = async (req, res) => {
 
   // sign token
   const token = jwt.sign({ user }, JWT_SECRET);
-  res.json({ msg: "User logged in!", token });
+
+  // send set-cookie header with response
+  res.cookie("authToken", token, {
+    httpOnly: true,
+    secure: false,
+    samesite: "none",
+  });
+
+  res.json({ msg: "Login Successful!" });
+  // res.json({ msg: "User logged in!", token });
 };
 
 // verify middleware
 exports.verifyToken = (req, res, next) => {
+  // verify from cookie
+  const authCookie = req.cookies.authToken;
+
+  if (!authCookie) {
+    return res.status(401).json({ msg: "Unauthorize: No Token Found!" });
+  }
+
+  try {
+    // console.log(authCookie);
+    const token = jwt.verify(authCookie, JWT_SECRET);
+    console.log(token);
+    req.user = token.user;
+    next();
+  } catch (error) {
+    return res.status(403).json({ msg: "Invalid or expired token" });
+  }
+
   // add token to the request
-  const bearerHeader = req.headers["authorization"];
-  const authToken = bearerHeader && bearerHeader.split(" ")[1];
-  if (!authToken) return res.status(500).send("Unauthorized access!");
-  req.token = authToken;
+  // const bearerHeader = req.headers["authorization"];
+  // const authToken = bearerHeader && bearerHeader.split(" ")[1];
+  // if (!authToken) return res.status(500).send("Unauthorized access!");
+  // req.token = authToken;
 
-  // verify the token and add user to the request obj
-  jwt.verify(req.token, JWT_SECRET, (err, data) => {
-    if (err) return res.sendStatus(403);
-    req.user = data.user;
-  });
-
-  next();
+  // // verify the token and add user to the request obj
+  // jwt.verify(req.token, JWT_SECRET, (err, data) => {
+  //   if (err) return res.sendStatus(403);
+  //   req.user = data.user;
+  // });
+  // next();
 };
 
 exports.verifyOwnership = (req, res, next) => {
