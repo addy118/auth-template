@@ -1,0 +1,54 @@
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { User } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export default function Layout() {
+  const user = { id: 1 };
+  return (
+    <>
+      <div className="bg-background mb-6">
+        <header className="border-b">
+          <div className="max-w-8xl mx-auto flex h-16 items-center justify-between px-4 lg:h-20">
+            <a href="/" className="text-2xl font-bold">
+              Name
+            </a>
+            <div className="flex items-center space-x-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="cursor-pointer">
+                  <User className="h-5 w-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  side="bottom"
+                  align="end"
+                  sideOffset={8}
+                  className="rounded-md border bg-white shadow-md"
+                >
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <Link to={`/user/${user.id}/profile`}>
+                    <DropdownMenuItem className="cursor-pointer">
+                      Profile
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem>Log Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </header>
+      </div>
+      <Outlet />
+    </>
+  );
+}
