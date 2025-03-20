@@ -120,10 +120,25 @@ const generateTokens = (user) => {
     { expiresIn: "10m" }
   );
 
+  //   "accessToken": {
+  //     "id": 1,
+  //     "name": "addy",
+  //     "username": "addy118",
+  //     "email": "addy@test.com",
+  //     "iat": 1742489157,
+  //     "exp": 1742489757
+  // }
+
   // sign refresh token
   const refreshToken = jwt.sign({ id: user.id }, REFRESH_TOKEN, {
     expiresIn: "10d",
   });
+
+  // "refreshToken": {
+  //   "id": 1,
+  //   "iat": 1742489157,
+  //   "exp": 1742489757,
+  // }
 
   return { accessToken, refreshToken };
 };
