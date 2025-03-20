@@ -2,7 +2,7 @@ require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../prisma/queries/User");
-const { JWT_SECRET } = process.env;
+const { ACCESS_TOKEN, REFRESH_TOKEN } = process.env;
 
 exports.postSignup = async (req, res) => {
   const { name, username, email, password } = req.body;
@@ -22,51 +22,81 @@ exports.postLogin = async (req, res) => {
   const matched = await bcrypt.compare(password, user.password);
   if (!matched) return res.status(400).send("Invalid password!");
 
-  // sign token
-  const token = jwt.sign({ user }, JWT_SECRET);
+  const { accessToken, refreshToken } = generateTokens(user);
 
   // send set-cookie header with response
-  res.cookie("authToken", token, {
+  res.cookie("refreshCookie", refreshToken, {
     httpOnly: true,
+    // true in prod (only send over https)
     secure: false,
-    samesite: "none",
+    samesite: "None",
   });
 
-  res.json({ msg: "Login Successful!" });
-  // res.json({ msg: "User logged in!", token });
+  res.json({ msg: "Login Successful!", accessToken });
 };
 
-// verify middleware
-exports.verifyToken = (req, res, next) => {
-  // verify from cookie
-  const authCookie = req.cookies.authToken;
+exports.getToken = async (req, res) => {
+  // extract access token from header
+  const bearerHeader = req.headers["authorization"];
+  const accessToken = bearerHeader && bearerHeader.split(" ")[1];
+  if (!accessToken) return res.status(500).send("Unauthorized access!");
 
-  if (!authCookie) {
-    return res.status(401).json({ msg: "Unauthorize: No Token Found!" });
+  try {
+    // verify the token
+    const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
+    // send the decoded token to client
+    res.json({ accessToken: decoded });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+  }
+};
+
+exports.verifyToken = (req, res, next) => {
+  // extract access token from header
+  const bearerHeader = req.headers["authorization"];
+  const accessToken = bearerHeader && bearerHeader.split(" ")[1];
+  if (!accessToken) return res.status(500).send("Unauthorized access!");
+
+  // verify it and proceed
+  try {
+    const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+  }
+};
+
+exports.refresh = async (req, res) => {
+  // verify the refresh token from cookie
+  const refreshCookie = req.cookies.refreshCookie;
+
+  if (!refreshCookie) {
+    return res.status(401).json({ msg: "Unauthorized: No Token Found" });
   }
 
   try {
-    // console.log(authCookie);
-    const token = jwt.verify(authCookie, JWT_SECRET);
-    console.log(token);
-    req.user = token.user;
-    next();
+    console.log(refreshCookie);
+    const decoded = jwt.verify(refreshCookie, REFRESH_TOKEN);
+    const user = await User.getById(decoded.id);
+
+    if (!user) {
+      return res.status(403).json({ msg: "User not found" });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user);
+
+    res.cookie("refreshCookie", refreshToken, {
+      httpOnly: true,
+      // true in prod (only send over https)
+      secure: false,
+      samesite: "None",
+    });
+
+    res.json({ msg: "Tokens Regenerated", accessToken });
   } catch (error) {
     return res.status(403).json({ msg: "Invalid or expired token" });
   }
-
-  // add token to the request
-  // const bearerHeader = req.headers["authorization"];
-  // const authToken = bearerHeader && bearerHeader.split(" ")[1];
-  // if (!authToken) return res.status(500).send("Unauthorized access!");
-  // req.token = authToken;
-
-  // // verify the token and add user to the request obj
-  // jwt.verify(req.token, JWT_SECRET, (err, data) => {
-  //   if (err) return res.sendStatus(403);
-  //   req.user = data.user;
-  // });
-  // next();
 };
 
 exports.verifyOwnership = (req, res, next) => {
@@ -75,4 +105,25 @@ exports.verifyOwnership = (req, res, next) => {
     return res.status(403).json({ msg: "You don't have access rights" });
 
   next();
+};
+
+const generateTokens = (user) => {
+  // sign access token
+  const accessToken = jwt.sign(
+    {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+    },
+    ACCESS_TOKEN,
+    { expiresIn: "10m" }
+  );
+
+  // sign refresh token
+  const refreshToken = jwt.sign({ id: user.id }, REFRESH_TOKEN, {
+    expiresIn: "10d",
+  });
+
+  return { accessToken, refreshToken };
 };
