@@ -36,16 +36,18 @@ exports.postLogin = async (req, res) => {
 };
 
 exports.getToken = async (req, res) => {
-  // extract access token from header
+  // check access token in header
   const bearerHeader = req.headers["authorization"];
   const accessToken = bearerHeader && bearerHeader.split(" ")[1];
-  if (!accessToken) return res.status(500).send("Unauthorized access!");
+  if (!accessToken)
+    return res.status(403).json({ msg: "Invalid or expired token" });
 
   try {
     // verify the token
     const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
-    // send the decoded token to client
-    res.json({ accessToken: decoded });
+    // send the decoded and raw token to client
+    // console.log({ accessToken, user: decoded });
+    return res.json({ accessToken, user: decoded });
   } catch (err) {
     res.status(403).json({ msg: err.message });
   }
@@ -63,12 +65,14 @@ exports.verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(403).json({ msg: err.message });
+    console.error(err.message);
+    res.status(403).json({ msg: "Invalid or expired token" });
   }
 };
 
 exports.refresh = async (req, res) => {
   // verify the refresh token from cookie
+  // console.log("from refresh");
   const refreshCookie = req.cookies.refreshCookie;
 
   if (!refreshCookie) {
@@ -76,12 +80,12 @@ exports.refresh = async (req, res) => {
   }
 
   try {
-    console.log(refreshCookie);
+    // console.log(refreshCookie);
     const decoded = jwt.verify(refreshCookie, REFRESH_TOKEN);
     const user = await User.getById(decoded.id);
 
     if (!user) {
-      return res.status(403).json({ msg: "User not found" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
     const { accessToken, refreshToken } = generateTokens(user);
