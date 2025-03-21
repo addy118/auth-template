@@ -11,21 +11,41 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/authProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+  const { isAuth, login } = useAuth();
+  const navigate = useNavigate();
+
+  if (isAuth) navigate("/home");
+
   const [formData, setFormData] = useState({
-    identifier: "",
+    data: "",
     password: "",
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Login Data:", formData);
-    // Handle login logic here
+
+    try {
+      // const response = await api.post("/auth/login", {
+      //   data: formData.data,
+      //   password: formData.password,
+      // });
+      login(formData);
+      console.log("Response Data: ", response.data);
+
+      setError("");
+    } catch (error) {
+      setError(error.response?.data?.message || "Login Failed");
+    }
   };
 
   return (
@@ -41,12 +61,12 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="identifier">Username or Email</Label>
+              <Label htmlFor="data">Username or Email</Label>
               <Input
-                id="identifier"
+                id="data"
                 placeholder="johndoe or john@example.com"
                 required
-                value={formData.identifier}
+                value={formData.data}
                 onChange={handleChange}
               />
             </div>

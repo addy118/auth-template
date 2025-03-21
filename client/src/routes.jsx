@@ -1,23 +1,29 @@
 import React from "react";
-import App from "./pages/App";
-import ErrorPage from "./pages/ErrorPage";
-import SignupPage from "./pages/SignUp";
-import LoginPage from "./pages/Login";
+import { createBrowserRouter } from "react-router-dom";
+import AuthProvider from "@/authProvider";
+import ProtectedRoute from "@/ProtectedRoute";
+import App from "@/App";
+import LoginPage from "@/pages/Login";
+import Home from "@/pages/Home";
 import Layout from "./components/Layout";
 
-const routes = [
+const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
-    errorElement: <ErrorPage />,
+    element: (
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    ),
     children: [
-      { index: true, element: <App /> },
-      { path: "user/:userId/profile", element: <App /> },
-      { path: "new", element: <App /> },
+      { path: "/", element: <App /> },
+      { path: "login", element: <LoginPage /> },
+      {
+        element: <ProtectedRoute />,
+        children: [{ path: "home", element: <Home /> }],
+      },
     ],
   },
-  { path: "signup", element: <SignupPage /> },
-  { path: "login", element: <LoginPage /> },
-];
+]);
 
-export default routes;
+export default router;

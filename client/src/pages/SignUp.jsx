@@ -10,14 +10,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/authProvider";
 
 export default function SignupPage() {
+  const { signup } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     username: "",
     email: "",
     password: "",
-    bio: "",
   });
 
   const handleChange = (e) => {
@@ -27,7 +28,9 @@ export default function SignupPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Signup Data:", formData);
-    // Handle signup logic here (e.g., API call)
+
+    // ensure formData matches the structure for /signup body
+    signup(formData);
   };
 
   return (
@@ -35,9 +38,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>
-            Create a new account
-          </CardDescription>
+          <CardDescription>Create a new account</CardDescription>
         </CardHeader>
 
         <CardContent>
