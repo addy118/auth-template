@@ -115,6 +115,7 @@ const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const response = await api.post("auth/login", credentials);
     setToken(response.data.accessToken);
+    setUser(response.data.user);
 
     const from = location.state?.from?.pathname || "/home";
     navigate(from, { replace: true });
@@ -123,7 +124,7 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     await api.post("auth/logout");
     setToken(null);
-    navigate("/")
+    navigate("/");
   };
 
   const contextValue = {

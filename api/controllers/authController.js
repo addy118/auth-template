@@ -32,7 +32,13 @@ exports.postLogin = async (req, res) => {
     samesite: "None",
   });
 
-  res.json({ msg: "Login Successful!", accessToken });
+  try {
+    const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
+    // send the decoded and raw token to client
+    return res.json({ msg: "Login Successful!", accessToken, user: decoded });
+  } catch (err) {
+    res.status(403).json({ msg: err.message });
+  }
 };
 
 exports.postLogout = async (req, res) => {
