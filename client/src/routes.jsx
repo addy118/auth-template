@@ -6,6 +6,8 @@ import App from "@/App";
 import LoginPage from "@/pages/Login";
 import Home from "@/pages/Home";
 import Layout from "./components/Layout";
+import Profile from "./pages/Profile";
+import SignupPage from "./pages/SignUp";
 
 const router = createBrowserRouter([
   {
@@ -18,31 +20,22 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <App /> },
       { path: "login", element: <LoginPage /> },
+      { path: "signup", element: <SignupPage /> },
       {
         element: <ProtectedRoute />,
-        children: [{ path: "home", element: <Home /> }],
+        children: [
+          {
+            path: "home",
+            element: <Home />,
+          },
+          {
+            path: "user/:userId/profile",
+            element: <Profile />,
+          },
+        ],
       },
     ],
   },
-  // {
-  //   path: "/",
-  //   element: <AuthProvider />,
-  //   children: [
-  //     { path: "/login", element: <LoginPage /> },
-  //     {
-  //       path: "/",
-  //       element: <Layout />,
-  //       children: [
-  //         { path: "/", element: <App /> },
-  //         {
-  //           path: "/home",
-  //           element: <ProtectedRoute />,
-  //           children: [{ path: "home", element: <Home /> }],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
 ]);
 
 export default router;

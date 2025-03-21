@@ -1,13 +1,13 @@
 import React from "react";
-import AuthProvider, { useAuth } from "./authProvider";
-import Routes from "./routes";
+import { useAuth } from "./authProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function App() {
-  const { token } = useAuth();
+  const { isAuth } = useAuth();
+  const navigate = useNavigate();
   return (
-    <>
-      <div>welcome to our app!</div>
-      {token ? <div>{token}</div> : <div>no token</div>}
-    </>
+    <div className="flex items-center justify-center">
+      {isAuth ? navigate("/home") : <h2>Register on our app today itself!</h2>}
+    </div>
   );
 }

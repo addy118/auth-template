@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/authProvider";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const { isAuth, login } = useAuth();
@@ -99,9 +99,9 @@ export default function LoginPage() {
         <CardFooter className="flex justify-center">
           <p className="text-muted-foreground text-sm">
             Don't have an account?{" "}
-            <a href="/signup" className="text-primary hover:underline">
+            <Link to={`/signup`} className="text-primary hover:underline">
               Sign up
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>

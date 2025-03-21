@@ -16,7 +16,7 @@ import { useAuth } from "@/authProvider";
 
 export default function Layout() {
   const user = { id: 1 };
-  const { logout } = useAuth();
+  const { isAuth, signup, login, logout } = useAuth();
 
   return (
     <>
@@ -31,21 +31,43 @@ export default function Layout() {
                 <DropdownMenuTrigger className="cursor-pointer">
                   <User className="h-5 w-5" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  side="bottom"
-                  align="end"
-                  sideOffset={8}
-                  className="rounded-md border bg-white shadow-md"
-                >
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <Link to={`/user/${user.id}/profile`}>
-                    <DropdownMenuItem className="cursor-pointer">
-                      Profile
+                {isAuth ? (
+                  <DropdownMenuContent
+                    side="bottom"
+                    align="end"
+                    sideOffset={8}
+                    className="rounded-md border bg-white shadow-md"
+                  >
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Link to={`/user/${user.id}/profile`}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Profile
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuItem onClick={logout}>
+                      Log Out
                     </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuItem onClick={logout}>Log Out</DropdownMenuItem>
-                </DropdownMenuContent>
+                  </DropdownMenuContent>
+                ) : (
+                  <DropdownMenuContent
+                    side="bottom"
+                    align="end"
+                    sideOffset={8}
+                    className="rounded-md border bg-white shadow-md"
+                  >
+                    <Link to={`/login`}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Login
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to={`/signup`}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        Register
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
             </div>
           </div>

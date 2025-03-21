@@ -93,7 +93,7 @@ const AuthProvider = ({ children }) => {
           } catch {
             console.log("Token refresh failed. Redirecting to login...");
             setToken(null);
-            navigate("/login", { replace: true });
+            navigate("/", { replace: true });
           }
         }
 
@@ -123,7 +123,7 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     await api.post("auth/logout");
     setToken(null);
-    navigate("/login")
+    navigate("/")
   };
 
   const contextValue = {

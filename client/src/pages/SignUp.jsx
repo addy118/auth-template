@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/authProvider";
+import { Link } from "react-router-dom";
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -34,7 +35,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
@@ -100,9 +101,9 @@ export default function SignupPage() {
         <CardFooter className="flex justify-center">
           <p className="text-muted-foreground text-sm">
             Already have an account?{" "}
-            <a href="/login" className="text-primary hover:underline">
-              Log in
-            </a>
+            <Link to={`/login`} className="text-primary hover:underline">
+              Login
+            </Link>
           </p>
         </CardFooter>
       </Card>
