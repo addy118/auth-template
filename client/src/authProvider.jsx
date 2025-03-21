@@ -26,10 +26,13 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState();
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
+  const [signupErrors, setSignupErrors] = useState({});
+  const [loginErrors, setLoginErrors] = useState({});
 
-  useEffect(() => {
-    console.log("Updated Token in State:", token);
-  }, [token]);
+  // token check in state
+  // useEffect(() => {
+  //   console.log("Updated Token in State:", token);
+  // }, [token]);
 
   // set the token info to state
   // executes only once at mount
@@ -41,8 +44,8 @@ const AuthProvider = ({ children }) => {
         setToken(response.data.accessToken);
         setUser(response.data.user);
       } catch {
-        console.log("from fetchMe catch block");
-        console.log("No token found in req headers");
+        // console.log("from fetchMe catch block");
+        // console.log("No token found in req headers");
         setToken(null);
       } finally {
         setLoading(false);
@@ -81,7 +84,7 @@ const AuthProvider = ({ children }) => {
           error.response.data.msg == "Invalid or expired token"
         ) {
           try {
-            console.log("refreshing the token...");
+            console.log("Refreshing the token...");
             const response = await api.get("/auth/refresh");
             setToken(response.data.accessToken);
             // setUser(response.data.decoded);
@@ -108,17 +111,48 @@ const AuthProvider = ({ children }) => {
 
   // credentials = { name, username, email, password }
   const signup = async (credentials) => {
-    await api.post("auth/signup", credentials);
+    try {
+      setSignupErrors({});
+      await api.post("auth/signup", credentials);
+      alert("User created successfully!");
+      navigate("/login");
+    } catch (err) {
+      if (err.response && err.response.data.error) {
+        const serverErrors = {};
+        err.response.data.error.forEach((error) => {
+          if (!serverErrors[error.path]) {
+            serverErrors[error.path] = [];
+          }
+          serverErrors[error.path].push(error.msg);
+        });
+        setSignupErrors(serverErrors);
+      }
+    }
   };
 
   // credentials = { data, password }
   const login = async (credentials) => {
-    const response = await api.post("auth/login", credentials);
-    setToken(response.data.accessToken);
-    setUser(response.data.user);
+    try {
+      const response = await api.post("auth/login", credentials);
+      setToken(response.data.accessToken);
+      setUser(response.data.user);
 
-    const from = location.state?.from?.pathname || "/home";
-    navigate(from, { replace: true });
+      const from = location.state?.from?.pathname || "/home";
+      navigate(from, { replace: true });
+    } catch (err) {
+      // console.log(err.response);
+      if (err.response && err.response.data.error) {
+        const serverErrors = {};
+        err.response.data.error.forEach((error) => {
+          if (!serverErrors[error.path]) {
+            serverErrors[error.path] = [];
+          }
+          serverErrors[error.path].push(error.msg);
+        });
+        setLoginErrors(serverErrors);
+        // console.log(serverErrors);
+      }
+    }
   };
 
   const logout = async () => {
@@ -133,7 +167,9 @@ const AuthProvider = ({ children }) => {
     loading,
     isAuth: !!token,
     signup,
+    signupErrors,
     login,
+    loginErrors,
     logout,
     setToken,
     setUser,

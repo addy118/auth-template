@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 export default function Profile() {
   const { userId } = useParams();
   const { user } = useAuth();
-  console.log(userId);
+  // console.log(userId);
 
   // const user = {
   //   name: "Jane Doe",

@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Layout from "./components/Layout";
 import Profile from "./pages/Profile";
 import SignupPage from "./pages/SignUp";
+import ErrorPage from "./pages/ErrorPage";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
         <Layout />
       </AuthProvider>
     ),
+    errorElement: <ErrorPage />,
     children: [
       { path: "/", element: <App /> },
       { path: "login", element: <LoginPage /> },

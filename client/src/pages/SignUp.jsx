@@ -14,7 +14,7 @@ import { useAuth } from "@/authProvider";
 import { Link } from "react-router-dom";
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { signupErrors, signup } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -28,7 +28,7 @@ export default function SignupPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Signup Data:", formData);
+    // console.log("Signup Data:", formData);
 
     // ensure formData matches the structure for /signup body
     signup(formData);
@@ -46,6 +46,7 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
+
               <Input
                 id="name"
                 placeholder="John Doe"
@@ -53,10 +54,18 @@ export default function SignupPage() {
                 value={formData.name}
                 onChange={handleChange}
               />
+
+              {signupErrors.name &&
+                signupErrors.name.map((err, i) => (
+                  <p key={i} className="text-red-400">
+                    {err}
+                  </p>
+                ))}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
+
               <Input
                 id="username"
                 placeholder="johndoe"
@@ -64,10 +73,18 @@ export default function SignupPage() {
                 value={formData.username}
                 onChange={handleChange}
               />
+
+              {signupErrors.username &&
+                signupErrors.username.map((err, i) => (
+                  <p key={i} className="text-red-400">
+                    {err}
+                  </p>
+                ))}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
+
               <Input
                 id="email"
                 type="email"
@@ -76,10 +93,18 @@ export default function SignupPage() {
                 value={formData.email}
                 onChange={handleChange}
               />
+
+              {signupErrors.email &&
+                signupErrors.email.map((err, i) => (
+                  <p key={i} className="text-red-400">
+                    {err}
+                  </p>
+                ))}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
+
               <Input
                 id="password"
                 type="password"
@@ -87,6 +112,13 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
               />
+
+              {signupErrors.password &&
+                signupErrors.password.map((err, i) => (
+                  <p key={i} className="text-red-400">
+                    {err}
+                  </p>
+                ))}
             </div>
 
             <Button

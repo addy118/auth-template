@@ -76,7 +76,7 @@ exports.putUserPass = async (req, res) => {
 
   try {
     // check old password
-    console.log(req.user);
+    // console.log(req.user);
     const matched = await bcrypt.compare(oldPass, req.user.password);
     if (!matched) return res.status(400).json({ msg: "Wrong password!" });
 

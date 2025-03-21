@@ -15,16 +15,14 @@ import { useAuth } from "@/authProvider";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const { isAuth, login } = useAuth();
-  const navigate = useNavigate();
-
-  if (isAuth) navigate("/home");
-
+  const { isAuth, login, loginErrors } = useAuth();
   const [formData, setFormData] = useState({
     data: "",
     password: "",
   });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  if (isAuth) navigate("/home");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -32,12 +30,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login Data:", formData);
 
     try {
       login(formData);
-      console.log("Response Data: ", response.data);
-
       setError("");
     } catch (error) {
       setError(error.response?.data?.message || "Login Failed");
@@ -58,6 +53,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="data">Username or Email</Label>
+
               <Input
                 id="data"
                 placeholder="johndoe or john@example.com"
@@ -65,6 +61,11 @@ export default function LoginPage() {
                 value={formData.data}
                 onChange={handleChange}
               />
+
+              {loginErrors.data &&
+                loginErrors.data.map((err, i) => (
+                  <p key={i} className="text-red-400">{err}</p>
+                ))}
             </div>
 
             <div className="space-y-2">
@@ -85,6 +86,11 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
               />
+
+              {loginErrors.password &&
+                loginErrors.password.map((err, i) => (
+                  <p key={i} className="text-red-400">{err}</p>
+                ))}
             </div>
 
             <Button
