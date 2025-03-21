@@ -35,10 +35,6 @@ export default function LoginPage() {
     console.log("Login Data:", formData);
 
     try {
-      // const response = await api.post("/auth/login", {
-      //   data: formData.data,
-      //   password: formData.password,
-      // });
       login(formData);
       console.log("Response Data: ", response.data);
 
@@ -49,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Log In</CardTitle>

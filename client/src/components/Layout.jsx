@@ -12,16 +12,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/authProvider";
 
 export default function Layout() {
   const user = { id: 1 };
+  const { logout } = useAuth();
+
   return (
     <>
       <div className="bg-background mb-6">
         <header className="border-b">
           <div className="max-w-8xl mx-auto flex h-16 items-center justify-between px-4 lg:h-20">
             <a href="/" className="text-2xl font-bold">
-              Name
+              AppName
             </a>
             <div className="flex items-center space-x-4">
               <DropdownMenu>
@@ -41,7 +44,7 @@ export default function Layout() {
                       Profile
                     </DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem>Log Out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>Log Out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -35,6 +35,15 @@ exports.postLogin = async (req, res) => {
   res.json({ msg: "Login Successful!", accessToken });
 };
 
+exports.postLogout = async (req, res) => {
+  res.clearCookie("refreshCookie", {
+    httpOnly: true,
+    secure: false,
+    samesite: "None",
+  });
+  res.status(200).json({ msg: "Logged out successfully" });
+};
+
 exports.getToken = async (req, res) => {
   // check access token in header
   const bearerHeader = req.headers["authorization"];
