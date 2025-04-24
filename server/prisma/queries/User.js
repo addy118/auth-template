@@ -1,18 +1,111 @@
 const db = require("../../config/prismaClient");
 
 class User {
-  static async create(name, username, email, password) {
+  static async create(name, username, phone, email, password) {
     try {
       const user = await db.user.create({
-        data: { name, username, email, password },
+        data: { name, username, phone, email, password },
       });
       return user;
     } catch (error) {
-      console.error("Error creating user:  ", error.stack);
+      console.error("Error creating user: ", error.stack);
+      if (error.code === "P2002") {
+        // Handling unique constraint violation
+        throw new Error(
+          "A user with this email, phone or username already exists."
+        );
+      }
       throw new Error("Failed to create user.");
     }
   }
 
+  static async getBasicInfo(id) {
+    try {
+      return await db.user.findUnique({
+        where: { id: Number(id) },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          email: true,
+          phone: true,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching user info: ", error.stack);
+      throw new Error("Failed to fetch user info.");
+    }
+  }
+
+  static async get(data) {
+    try {
+      const user = await db.user.findFirst({
+        where: {
+          OR: [{ username: data }, { email: data }],
+        },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          phone: true,
+          email: true,
+          password: true,
+          createdAt: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by email/username: ", error.stack);
+      throw new Error("Failed to fetch user by email/username.");
+    }
+  }
+
+  static async getById(id) {
+    try {
+      const user = await db.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          phone: true,
+          email: true,
+          createdAt: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by ID: ", error.stack);
+      throw new Error("Failed to fetch user by ID.");
+    }
+  }
+
+  static async getNameById(id) {
+    try {
+      const user = await db.user.findUnique({
+        where: { id },
+        select: { name: true },
+      });
+      return user.name;
+    } catch (error) {
+      console.error("Error fetching name by ID: ", error.stack);
+      throw new Error("Failed to fetch name by ID.");
+    }
+  }
+
+  static async getIdbyUserName(username) {
+    try {
+      const userId = await db.user.findFirst({
+        where: { username },
+        select: { id: true },
+      });
+      return Number(userId.id);
+    } catch (error) {
+      console.error("Error fetching ID by username: ", error.stack);
+      throw new Error("Failed to fetch ID by username.");
+    }
+  }
+  
   static async changeEmail(userId, email) {
     try {
       await db.user.update({
@@ -20,8 +113,12 @@ class User {
         data: { email },
       });
     } catch (error) {
-      console.error("Error changing email:  ", error.stack);
-      throw new Error("Failed to update user email.");
+      console.error("Error changing email: ", error.stack);
+      if (error.code === "P2002") {
+        // Handling unique constraint violation
+        throw new Error("Email is already taken.");
+      }
+      throw new Error("Failed to update user's email.");
     }
   }
 
@@ -32,8 +129,32 @@ class User {
         data: { name },
       });
     } catch (error) {
-      console.error("Error updating name:  ", error.stack);
-      throw new Error("Failed to update user name.");
+      console.error("Error updating name: ", error.stack);
+      throw new Error("Failed to update user's name.");
+    }
+  }
+
+  static async changeUserName(userId, username) {
+    try {
+      await db.user.update({
+        where: { id: userId },
+        data: { username },
+      });
+    } catch (error) {
+      console.error("Error updating username: ", error.stack);
+      throw new Error("Failed to update user's username.");
+    }
+  }
+
+  static async changePhone(userId, phone) {
+    try {
+      await db.user.update({
+        where: { id: userId },
+        data: { phone },
+      });
+    } catch (error) {
+      console.error("Error updating name: ", error.stack);
+      throw new Error("Failed to update user's phone.");
     }
   }
 
@@ -44,49 +165,10 @@ class User {
         data: { password },
       });
     } catch (error) {
-      console.error("Error updating password:  ", error.stack);
+      console.error("Error updating password: ", error.stack);
       throw new Error("Failed to update user password.");
     }
   }
-
-  static async get(data) {
-    try {
-      const user = await db.user.findFirst({
-        where: {
-          OR: [{ username: data }, { email: data }],
-        },
-      });
-      return user;
-    } catch (error) {
-      console.error("Error fetching user by email/username:  ", error.stack);
-      throw new Error("Failed to fetch user by email/username");
-    }
-  }
-
-  static async getById(id) {
-    try {
-      const user = await db.user.findUnique({
-        where: { id },
-        omit: { password: true },
-      });
-      return user;
-    } catch (error) {
-      console.error("Error fetching user by ID:  ", error.stack);
-      throw new Error("Failed to fetch user by ID.");
-    }
-  }
-
-  // static async getByEmail(email) {
-  //   try {
-  //     const user = await db.user.findUnique({
-  //       where: { email },
-  //     });
-  //     return user;
-  //   } catch (error) {
-  //     console.error("Error fetching user by email:  ", error.stack);
-  //     throw new Error("Failed to fetch user by email.");
-  //   }
-  // }
 
   static async delete(userId) {
     try {
@@ -94,7 +176,7 @@ class User {
         where: { id: userId },
       });
     } catch (error) {
-      console.error("Error deleting user:  ", error.stack);
+      console.error("Error deleting user: ", error.stack);
       throw new Error("Failed to delete user.");
     }
   }
